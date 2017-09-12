@@ -1,4 +1,4 @@
-# Synapse pack with VelocityTemplateMediator
+# Apache Synapse with VelocityTemplateMediator
 Synapse Mediator for creating properties out of templates
 
 ## Why Velocity Template Mediator ?
