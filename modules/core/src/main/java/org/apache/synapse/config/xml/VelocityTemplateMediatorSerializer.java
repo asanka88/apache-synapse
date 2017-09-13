@@ -8,6 +8,7 @@ import org.apache.synapse.mediators.transform.VelocityTemplateMediator;
 import org.apache.synapse.mediators.transform.custom.ArgXpath;
 import org.apache.synapse.config.xml.enums.*;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.util.Iterator;
 import java.util.Map;
@@ -16,6 +17,7 @@ import java.util.Map;
  * Created by asanka on 3/7/16.
  */
 public class VelocityTemplateMediatorSerializer extends AbstractMediatorSerializer {
+
     @Override
     protected OMElement serializeSpecificMediator(Mediator mediator) {
         if(!(mediator instanceof VelocityTemplateMediator)){
@@ -24,10 +26,11 @@ public class VelocityTemplateMediatorSerializer extends AbstractMediatorSerializ
         }
 
         VelocityTemplateMediator velocityTemplateMediator =(VelocityTemplateMediator)mediator;
-        OMElement mediatorRoot = fac.createOMElement(VelocityTemplateMediatorFactory.propertyTemplateElement);
-        OMElement formatOmElement = fac.createOMElement(VelocityTemplateMediatorFactory.formatElement);
+        OMElement mediatorRoot = fac.createOMElement(VelocityTemplateMediatorFactory.propertyTemplateElement.getLocalPart(),synNS);
+        mediatorRoot.addAttribute(VelocityTemplateMediatorFactory.mediaTypeAttribute.getLocalPart(),velocityTemplateMediator.getMediaType(),null);
+        OMElement formatOmElement = fac.createOMElement(VelocityTemplateMediatorFactory.formatElement.getLocalPart(),synNS);
         OMElement formatBody=null;
-        if(StringUtils.equals(velocityTemplateMediator.getMediaType(),"xml")){
+        if(StringUtils.equals(velocityTemplateMediator.getMediaType(),MediaTypes.xml.toString())){
             try {
                 formatBody = AXIOMUtil.stringToOM(velocityTemplateMediator.getTemplate());
                 formatOmElement.addChild(formatBody);
@@ -39,38 +42,33 @@ public class VelocityTemplateMediatorSerializer extends AbstractMediatorSerializ
         }
 
         mediatorRoot.addChild(formatOmElement);
-        OMElement argsListElement = fac.createOMElement(VelocityTemplateMediatorFactory.argumentListElement);
-        Iterator<Map.Entry<String,ArgXpath>> iterator = velocityTemplateMediator.getxPathExpressions().entrySet().iterator();
+        OMElement argsListElement = fac.createOMElement(VelocityTemplateMediatorFactory.argumentListElement.getLocalPart(),synNS);
+        velocityTemplateMediator.getxPathExpressions().entrySet().stream().forEach(entry -> {
 
-        while (iterator.hasNext()){
-            Map.Entry<String, ArgXpath> next = iterator.next();
-            OMElement arg = fac.createOMElement(VelocityTemplateMediatorFactory.argumentElement);
-            arg.addAttribute(VelocityTemplateMediatorFactory.nameAttribute.getLocalPart(),next.getKey(),null);
-            arg.addAttribute(VelocityTemplateMediatorFactory.expressionAttribute.getLocalPart(),next.getValue().getRootExpr().getText(),null);
-            if(next.getValue().getType()!=null){
-                arg.addAttribute(VelocityTemplateMediatorFactory.argTypeAttribute.getLocalPart(),next.getValue().getType().toString(),null);
+            OMElement arg = fac.createOMElement(VelocityTemplateMediatorFactory.argumentElement.getLocalPart(),synNS);
+            arg.addAttribute(VelocityTemplateMediatorFactory.nameAttribute.getLocalPart(),entry.getKey(),null);
+            arg.addAttribute(VelocityTemplateMediatorFactory.expressionAttribute.getLocalPart(),entry.getValue().toString(),null);
+            if(entry.getValue().getType()!=null){
+                arg.addAttribute(VelocityTemplateMediatorFactory.argTypeAttribute.getLocalPart(),entry.getValue().getType().toString(),null);
             }
 
             argsListElement.addChild(arg);
-        }
 
-
+        });
 
         mediatorRoot.addChild(argsListElement);
 
-
-        OMElement targetElement = fac.createOMElement(VelocityTemplateMediatorFactory.targetElement);
+        OMElement targetElement = fac.createOMElement(VelocityTemplateMediatorFactory.targetElement.getLocalPart(),synNS);
         targetElement.addAttribute(VelocityTemplateMediatorFactory.targetType.getLocalPart(), velocityTemplateMediator.
                 getTargetType(),null);
 
-        if(StringUtils.equals(velocityTemplateMediator.getTargetType(),"property")){
+        if(StringUtils.equals(velocityTemplateMediator.getTargetType(),TargetType.property.toString())){
             targetElement.addAttribute(VelocityTemplateMediatorFactory.nameAttribute.getLocalPart(), velocityTemplateMediator.
                     getPropertyName(),null);
             targetElement.addAttribute(VelocityTemplateMediatorFactory.scopeAttribute.getLocalPart(), velocityTemplateMediator.
                     getScope(),null);
             targetElement.addAttribute(VelocityTemplateMediatorFactory.propertyTypeAttribute.getLocalPart(), velocityTemplateMediator
                     .getPropertyType(),null);
-
         }
 
         mediatorRoot.addChild(targetElement);

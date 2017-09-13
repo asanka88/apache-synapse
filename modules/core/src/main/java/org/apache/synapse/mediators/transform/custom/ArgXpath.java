@@ -31,77 +31,27 @@ public class ArgXpath extends SynapseXPath {
 
     public Object getFormattedResult(MessageContext messageContext) throws JaxenException {
         Object evaluate = this.evaluate(messageContext);
+        Object finalResult=null;
 
         PropertyTypes argType = Optional.ofNullable(this.type).orElse(PropertyTypes.string);
 
-        //if list
-
-//        if(evaluate instanceof ArrayList){
-//            ArrayList tmpList=(ArrayList)evaluate;
-//
-//            if(tmpList.size()==1){
-//                if(this.type==null){
-//                    return tmpList.get(0);
-//                }else{
-//                   return getString(((List) evaluate).get(0));
-//                }
-//            }else if(tmpList.size()>1){
-//                ArrayList<String> result=new ArrayList<String>(tmpList.size());
-//
-//               tmpList.stream().map(s -> getString(s)).collect(Collectors.toList());
-//
-//                return result;
-//
-//            }
-//        }
-
-
+        //TODO: handle other types and custom types
 
         if(argType==PropertyTypes.string){
             if (evaluate instanceof ArrayList) {
                 ArrayList tmpList = (ArrayList) evaluate;
 
                 if (tmpList.size() == 1) {
-                        return getString(((List) evaluate).get(0));
-
+                        finalResult= getString(((List) evaluate).get(0));
                 } else if (tmpList.size() > 1) {
-
-                    Object collect = tmpList.stream().map(o -> getString(o)).collect(Collectors.toList());
-
-                    return collect;
-
+                    finalResult = tmpList.stream().map(o -> getString(o)).collect(Collectors.toList());
                 }else{
-                    return "";
+                    finalResult= "";
                 }
             }
         }
 
-
-
-
-//        if(this.type==null){
-//            return evaluate;
-//        }else if(type==PropertyTypes.string){
-//            if(evaluate instanceof ArrayList){
-//                ArrayList tmpList=(ArrayList)evaluate;
-//                int size = tmpList.size();
-//                if(size >1){
-//                    ArrayList<String> result=new ArrayList<String>(tmpList.size());
-//                    Iterator iterator = tmpList.iterator();
-//                    while (iterator.hasNext()){
-//                        Object next = iterator.next();
-//                        result.add(getString(next));
-//                    }
-//                    return result;
-//                }else if(size==1){
-//                    Object o = tmpList.get(0);
-//                    return getString(o);
-//                }
-//
-//            }
-//
-//        }
-        return evaluate;
+        return finalResult;
     }
     private String getString(Object o){
         if(o instanceof OMElement){
@@ -125,6 +75,7 @@ public class ArgXpath extends SynapseXPath {
             this.type=null;
         }else {
             this.type=PropertyTypes.valueOf(type);
+            //what if is not string or om, what is type is custom ojo
         }
 
     }
