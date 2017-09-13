@@ -197,12 +197,7 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
             }else{
                 headerBlock = SOAP_12_FACTORY.createSOAPHeaderBlock(resultOM.getLocalName(),resultOM.getNamespace(),header);
             }
-            Iterator<OMElement> children = resultOM.getChildElements();
-            while (children.hasNext()){
-                OMElement next = children.next();
-                headerBlock.addChild(next);
-            }
-
+            headerBlock.addChild(resultOM);
 
         }
 
