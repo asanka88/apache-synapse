@@ -15,29 +15,8 @@ import org.jaxen.JaxenException;
  * Created by asanka on 9/13/17.
  */
 public class VelocityTemplateMediatorTest extends TestCase {
-    private static String ONE_TO_ONE_SOURCE ="<people>\n" +
-            "    <person>\n" +
-            "      <name>user1</name>\n" +
-            "      <age>27</age>   \n" +
-            "    </person>  \n" +
-            "</people>";
-
-
-    private static String ONE_TO_ONE_CODE ="<velocityTemplate media-type=\"xml\" xmlns=\"http://ws.apache.org/ns/synapse\">\n" +
-            "   <format>\n" +
-            "      <person xmlns=\"\">\n" +
-            "         <fname>$name</fname>\n" +
-            "         <age>$age</age>\n" +
-            "      </person>\n" +
-            "   </format>\n" +
-            "   <args>\n" +
-            "      <arg name=\"name\" expression=\"//name/text()\" />\n" +
-            "      <arg name=\"age\" expression=\"//age/text()\" />\n" +
-            "   </args>\n" +
-            "   <target target-type=\"body\"/>\n" +
-            "</velocityTemplate>";
-
-
+    private static String ONE_TO_ONE_SOURCE ="<people><person><name>user1</name><age>27</age></person></people>";
+    private static String ONE_TO_ONE_CODE ="<velocityTemplate media-type=\"xml\" xmlns=\"http://ws.apache.org/ns/synapse\"><format><person xmlns=\"\"><fname>$name</fname><age>$age</age></person></format><args><arg name=\"name\" expression=\"//name/text()\" /><arg name=\"age\" expression=\"//age/text()\" /></args><target target-type=\"body\"/></velocityTemplate>";
     private static String ARRAY_CODE="<velocityTemplate media-type=\"xml\" xmlns=\"http://ws.apache.org/ns/synapse\"><format><students xmlns=\"\">        #foreach($student in $students)            <student><name>$student</name></student>        #end    </students></format><args><arg name=\"students\" expression=\"//name/text()\" type=\"string\" /></args><target target-type=\"body\"/></velocityTemplate>";
     private static String ARRAY_SOURCE="<people><person><name>asanka</name><age>27</age></person><person><name>nuwan</name><age>28</age></person><person><name>Eranda</name><age>30</age></person><person><name>Malith</name><age>27</age></person></people>";
     public void testOneToOneTransformation() throws Exception {
