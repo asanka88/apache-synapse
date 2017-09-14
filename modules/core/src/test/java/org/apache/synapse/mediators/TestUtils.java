@@ -119,6 +119,14 @@ public class TestUtils {
         return synMc;
     }
 
+    public static SynapseEnvironment getTestSynaseEnvironment(){
+        SynapseConfiguration synapseConfig = new SynapseConfiguration();
+        AxisConfiguration axisConfig = new AxisConfiguration();
+        ConfigurationContext configContext = new ConfigurationContext(axisConfig);
+        SynapseEnvironment env = new Axis2SynapseEnvironment(configContext, synapseConfig);
+        return env;
+
+    }
     public static OMElement createOMElement(String xml) {
         return SynapseConfigUtils.stringToOM(xml);
     }
