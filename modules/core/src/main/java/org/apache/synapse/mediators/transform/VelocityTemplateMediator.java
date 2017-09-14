@@ -77,7 +77,7 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
          });
 
         StringWriter writer = new StringWriter();
-        boolean propTempate = velocityEngine.evaluate(context, writer, "propTempate", new StringReader(this.getTemplate()));
+        velocityEngine.evaluate(context, writer, "propTempate", new StringReader(this.getTemplate()));
         try {
             String result = writer.toString();
             if(LOG.isDebugEnabled()){
@@ -166,6 +166,7 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
         if(mediaType==MediaTypes.xml) {
             resultOM = AXIOMUtil.stringToOM(result);
         }else {
+            //TODO: Addjson support
             //resultOM= JsonUtil.toXml(new ByteArrayInputStream(result.getBytes()), true);
         }
 
@@ -272,6 +273,9 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
     public void setMediaType(String mediaType) {
         try {
             this.mediaType=MediaTypes.valueOf(mediaType.toLowerCase());
+            if(MediaTypes.json==this.mediaType){
+                throw new SynapseArtifactDeploymentException("json media type not supported");
+            }
         }catch (IllegalArgumentException ex){
             throw new SynapseArtifactDeploymentException("Unsupported media type");
         }
