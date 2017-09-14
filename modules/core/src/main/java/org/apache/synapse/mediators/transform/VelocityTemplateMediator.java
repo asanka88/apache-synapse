@@ -4,16 +4,16 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.soap.*;
+import org.apache.axiom.soap.SOAPBody;
+import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
-import org.apache.synapse.config.xml.enums.MediaTypes;
-import org.apache.synapse.config.xml.enums.PropertyTypes;
-import org.apache.synapse.config.xml.enums.Scopes;
-import org.apache.synapse.config.xml.enums.TargetType;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.deployers.SynapseArtifactDeploymentException;
@@ -23,13 +23,16 @@ import org.apache.synapse.mediators.transform.custom.ArgXpath;
 import org.apache.synapse.util.AXIOMUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.synapse.config.xml.enums.*;
 import org.jaxen.JaxenException;
 
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPException;
+import javax.xml.soap.*;
 import javax.xml.stream.XMLStreamException;
+import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -200,6 +203,12 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
         }
 
     }
+
+
+    private boolean isSOAP11(SOAPEnvelope envelope) {
+        return (SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI).equals(envelope.getNamespace().getNamespaceURI());
+    }
+
 
     private void handleEnvelope(String result,MessageContext messageContext) throws AxisFault, XMLStreamException {
         OMElement resultOM=null;
