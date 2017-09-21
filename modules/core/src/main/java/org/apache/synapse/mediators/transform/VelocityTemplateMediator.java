@@ -14,6 +14,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
+import org.apache.synapse.config.xml.enums.MediaTypes;
+import org.apache.synapse.config.xml.enums.PropertyTypes;
+import org.apache.synapse.config.xml.enums.Scopes;
+import org.apache.synapse.config.xml.enums.TargetType;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.deployers.SynapseArtifactDeploymentException;
@@ -23,17 +27,15 @@ import org.apache.synapse.mediators.transform.custom.ArgXpath;
 import org.apache.synapse.util.AXIOMUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.synapse.config.xml.enums.*;
 import org.jaxen.JaxenException;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.*;
 import javax.xml.stream.XMLStreamException;
-import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by asanka on 3/7/16.
@@ -49,7 +51,7 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
     private Scopes scope;
     private MediaTypes mediaType;
     private TargetType targetType;
-    private PropertyTypes propertyType;
+    private PropertyTypes propertyType=PropertyTypes.om;
     private VelocityEngine velocityEngine;
 
     public boolean mediate(MessageContext messageContext) {
@@ -68,7 +70,8 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
                     String msg=String.format("Argument %s result== %s",xpath.getRootExpr().getText(),result.toString());
                     LOG.debug(msg);
                 }
-                context.put(entry.getKey(),result);
+                Object val = Optional.ofNullable(result).orElse("");
+                context.put(entry.getKey(),val);
              } catch (JaxenException e) {
                 String msg = String.format("Error while evaluating argument %s",xpath.getRootExpr().getText());
                 LOG.error(msg,e);
@@ -170,6 +173,7 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
             //resultOM= JsonUtil.toXml(new ByteArrayInputStream(result.getBytes()), true);
         }
 
+        messageContext.getEnvelope().build();//handle passthrough
         SOAPBody body = messageContext.getEnvelope().getBody();
         PropertyTemplateUtils.cleanUp(body);
         body.addChild(resultOM);
@@ -244,13 +248,6 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
         return propertyType.toString();
     }
 
-    public void setPropertyType(String propertyType) {
-        try {
-            this.propertyType=PropertyTypes.valueOf(propertyType.toLowerCase());
-        }catch (IllegalArgumentException ex){
-            throw new SynapseArtifactDeploymentException("Unsupported property type");
-        }
-    }
 
     public String getTargetType() {
         return targetType.toString();

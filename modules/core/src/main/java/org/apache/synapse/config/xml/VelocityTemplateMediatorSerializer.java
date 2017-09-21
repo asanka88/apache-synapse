@@ -67,8 +67,6 @@ public class VelocityTemplateMediatorSerializer extends AbstractMediatorSerializ
                     getPropertyName(),null);
             targetElement.addAttribute(VelocityTemplateMediatorFactory.scopeAttribute.getLocalPart(), velocityTemplateMediator.
                     getScope(),null);
-            targetElement.addAttribute(VelocityTemplateMediatorFactory.propertyTypeAttribute.getLocalPart(), velocityTemplateMediator
-                    .getPropertyType(),null);
         }
 
         mediatorRoot.addChild(targetElement);

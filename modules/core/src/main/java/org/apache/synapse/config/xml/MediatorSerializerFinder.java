@@ -73,7 +73,8 @@ public class MediatorSerializerFinder {
         BeanMediatorSerializer.class,
         EJBMediatorSerializer.class,
         RespondMediatorSerializer.class,
-        LoopbackMediatorSerializer.class
+        LoopbackMediatorSerializer.class,
+        VelocityTemplateMediatorSerializer.class
     };
 
     private final static MediatorSerializerFinder instance = new MediatorSerializerFinder();

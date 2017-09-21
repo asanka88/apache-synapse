@@ -31,28 +31,60 @@ public class ArgXpath extends SynapseXPath {
 
     public Object getFormattedResult(MessageContext messageContext) throws JaxenException {
         Object evaluate = this.evaluate(messageContext);
-        Object finalResult=null;
+        Object finalResult;
 
         PropertyTypes argType = Optional.ofNullable(this.type).orElse(PropertyTypes.string);
 
         //TODO: handle other types and custom types
 
-        if(argType==PropertyTypes.string){
-            if (evaluate instanceof ArrayList) {
-                ArrayList tmpList = (ArrayList) evaluate;
-
-                if (tmpList.size() == 1) {
-                        finalResult= getString(((List) evaluate).get(0));
-                } else if (tmpList.size() > 1) {
-                    finalResult = tmpList.stream().map(o -> getString(o)).collect(Collectors.toList());
-                }else{
-                    finalResult= "";
-                }
-            }
+        switch (argType) {
+            case string:
+                finalResult = handleString(evaluate);
+                break;
+            case om:
+                finalResult = handleOM(evaluate);
+                break;
+            default:
+                finalResult = handleString(evaluate);
         }
 
         return finalResult;
     }
+
+    private Object handleString(Object result) {
+        Object finalResult;
+        if (result instanceof ArrayList) {
+            ArrayList tmpList = (ArrayList) result;
+
+            if (tmpList.size() == 1) {
+                finalResult= getString(((List) result).get(0));
+            } else if (tmpList.size() > 1) {
+                finalResult = tmpList.stream().map(this::getString).collect(Collectors.toList());
+            }else{
+                finalResult= "";
+            }
+        }else{
+            finalResult=result.toString();
+        }
+        return finalResult;
+    }
+
+    private Object handleOM(Object result) {
+        Object finalResult = null;
+        if (result instanceof ArrayList) {
+            ArrayList tmpList = (ArrayList) result;
+
+            if (tmpList.size() == 1) {
+                finalResult= (OMElement)tmpList.get(0);
+            } else if (tmpList.size() > 1) {
+                finalResult = tmpList;
+            }
+        }else{
+            finalResult=result;
+        }
+        return finalResult;
+    }
+
     private String getString(Object o){
         if(o instanceof OMElement){
             return o.toString();

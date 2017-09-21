@@ -29,7 +29,6 @@ public class VelocityTemplateMediatorFactory extends AbstractMediatorFactory {
     public static final QName nameAttribute =new QName("name");
     public static final QName argTypeAttribute=new QName("type");
     public static final QName scopeAttribute=new QName("scope");
-    public static final QName propertyTypeAttribute=new QName("property-type");
     public static final QName mediaTypeAttribute=new QName("media-type");
     public static final QName targetType=new QName("target-type");
     private static final Log LOG= LogFactory.getLog(VelocityTemplateMediatorFactory.class);
@@ -91,7 +90,6 @@ public class VelocityTemplateMediatorFactory extends AbstractMediatorFactory {
         if(StringUtils.equalsIgnoreCase("property",targetTypeValue)){
             //if the target type is property then property name is mandotary
             String propertyName = targetEle.getAttributeValue(nameAttribute);
-            String propertyType = targetEle.getAttributeValue(propertyTypeAttribute);
 
             if(StringUtils.isEmpty(propertyName)){
                 String msg = "property name attribute is required in Template Mediator," +
@@ -101,10 +99,8 @@ public class VelocityTemplateMediatorFactory extends AbstractMediatorFactory {
             }
             String scope = targetEle.getAttributeValue(scopeAttribute);
             scope=(StringUtils.isEmpty(scope))?"synapse":scope;
-            propertyType=(StringUtils.isEmpty(propertyType))?"string":propertyType;
             mediator.setPropertyName(propertyName);
             mediator.setScope(scope);
-            mediator.setPropertyType(propertyType);
         }
         return mediator;
     }
