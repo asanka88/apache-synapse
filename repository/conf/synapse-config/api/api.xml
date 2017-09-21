@@ -1,0 +1,80 @@
+<api name="testAPI" context="/velocity" 
+    xmlns="http://ws.apache.org/ns/synapse">
+    <resource uri-template="/test" methods="POST">
+        <inSequence>
+            <log level="custom">
+                <property name="prop1" value="===1:1 test ==="/>
+            </log>
+            <velocityTemplate media-type="xml" 
+                xmlns="http://ws.apache.org/ns/synapse">
+                <format>
+                    <person 
+                        xmlns="">
+                        <name>$name</name>
+                        <age>$age</age>
+                    </person>
+                </format>
+                <args>
+                    <arg name="name" expression="//name1/text()" type="string" />
+                    <arg name="age" expression="//age1/text()" type="string" />
+                </args>
+                <target target-type="body"/>
+            </velocityTemplate>
+            <respond/>
+        </inSequence>
+    </resource>
+    <resource uri-template="/array" methods="POST">
+        <inSequence>
+            <log level="custom">
+                <property name="array" value="===arrayTest==="/>
+            </log>
+            <property name="p" value="myname"/>
+            <velocityTemplate media-type="xml" 
+                xmlns="http://ws.apache.org/ns/synapse">
+                <format>
+                    <students 
+                        xmlns="">                            #foreach($student in $students)                                    
+                        <student>
+                            <name>$student</name>
+                            <test>$name</test>
+                        </student>                            #end                        
+                    </students>
+                </format>
+                <args>
+                    <arg name="students" expression="//name/text()" type="string" />
+                    <arg name="name" expression="$ctx:p" type="string" />
+                </args>
+                <target target-type="body"/>
+            </velocityTemplate>
+            <respond/>
+        </inSequence>
+    </resource>
+    <resource uri-template="/prop" methods="POST">
+        <inSequence>
+            <log level="custom">
+                <property name="array" value="===prop Test==="/>
+            </log>
+            <property name="code" value="testcode"/>
+            <velocityTemplate media-type="xml" 
+                xmlns="http://ws.apache.org/ns/synapse">
+                <format>
+                    <person 
+                        xmlns="">
+                        <name>$code</name>
+                    </person>
+                </format>
+                <args>
+                    <arg name="code" expression="$ctx:code"/>
+                </args>
+                <target target-type="body" type="string"/>
+            </velocityTemplate>
+                        <log level="full"/>
+
+  <!--<log level="custom">
+                <property name="array" expression="$ctx:prop1"/>
+            </log>-->
+
+            <respond/>
+        </inSequence>
+    </resource>
+</api> 

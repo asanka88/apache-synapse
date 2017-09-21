@@ -15,7 +15,7 @@ import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.config.xml.enums.MediaTypes;
-import org.apache.synapse.config.xml.enums.PropertyTypes;
+import org.apache.synapse.config.xml.enums.ArgType;
 import org.apache.synapse.config.xml.enums.Scopes;
 import org.apache.synapse.config.xml.enums.TargetType;
 import org.apache.synapse.core.SynapseEnvironment;
@@ -51,7 +51,6 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
     private Scopes scope;
     private MediaTypes mediaType;
     private TargetType targetType;
-    private PropertyTypes propertyType=PropertyTypes.om;
     private VelocityEngine velocityEngine;
 
     public boolean mediate(MessageContext messageContext) {
@@ -120,7 +119,7 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
                 break;
             case header:
                 //add to soap header
-                handleHeader(result,messageContext);
+                handleSoapHeader(result,messageContext);
                 break;
             default:
                 //add to template
@@ -130,7 +129,7 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
     }
 
     private void handleProperty(String result, MessageContext messageContext) throws XMLStreamException {
-        Object formattedProperty = getFormattedProperty(result, propertyType);
+        Object formattedProperty = getOMProperty(result);
         if(LOG.isDebugEnabled()){
             String msg = String.format("Target type:: property , scope %s",this.scope);
             LOG.debug(msg);
@@ -150,15 +149,8 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
         }
     }
 
-    private Object getFormattedProperty(String result, PropertyTypes propertyType) throws XMLStreamException {
-        switch (propertyType){
-            case string:
-                return result;
-            case om:
-                OMElement omElement = AXIOMUtil.stringToOM(result);
-                return omElement;
-        }
-        return null;
+    private Object getOMProperty(String result) throws XMLStreamException {
+        return AXIOMUtil.stringToOM(result);
     }
 
 
@@ -169,10 +161,9 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
         if(mediaType==MediaTypes.xml) {
             resultOM = AXIOMUtil.stringToOM(result);
         }else {
-            //TODO: Addjson support
+            //TODO: Add json support
             //resultOM= JsonUtil.toXml(new ByteArrayInputStream(result.getBytes()), true);
         }
-
         messageContext.getEnvelope().build();//handle passthrough
         SOAPBody body = messageContext.getEnvelope().getBody();
         PropertyTemplateUtils.cleanUp(body);
@@ -180,7 +171,7 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
     }
 
 
-    private void handleHeader(String result,MessageContext messageContext) throws AxisFault, XMLStreamException, SOAPException {
+    private void handleSoapHeader(String result, MessageContext messageContext) throws AxisFault, XMLStreamException, SOAPException {
         OMElement resultOM=null;
         //convert to xml and set to the template
 
@@ -243,11 +234,6 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
         PropertyTemplateUtils.cleanUp(body);
         body.addChild(resultOM);
     }
-
-    public String getPropertyType() {
-        return propertyType.toString();
-    }
-
 
     public String getTargetType() {
         return targetType.toString();
@@ -321,7 +307,7 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
         if(LOG.isDebugEnabled()){
-            LOG.debug("Initalizing Velocity Engine");
+            LOG.debug("Initializing Velocity Engine");
         }
         velocityEngine=new VelocityEngine();
         velocityEngine.init();

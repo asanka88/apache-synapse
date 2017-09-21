@@ -5,7 +5,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMText;
 import org.apache.commons.lang.StringUtils;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.config.xml.enums.PropertyTypes;
+import org.apache.synapse.config.xml.enums.ArgType;
 import org.apache.synapse.util.xpath.SynapseXPath;
 import org.jaxen.JaxenException;
 
@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
  */
 public class ArgXpath extends SynapseXPath {
 
-    private PropertyTypes type;
+    private ArgType type;
 
-    public PropertyTypes getType() {
+    public ArgType getType() {
         return type;
     }
 
-    public void setType(PropertyTypes type) {
+    public void setType(ArgType type) {
         this.type = type;
     }
 
@@ -33,7 +33,7 @@ public class ArgXpath extends SynapseXPath {
         Object evaluate = this.evaluate(messageContext);
         Object finalResult;
 
-        PropertyTypes argType = Optional.ofNullable(this.type).orElse(PropertyTypes.string);
+        ArgType argType = Optional.ofNullable(this.type).orElse(ArgType.string);
 
         //TODO: handle other types and custom types
 
@@ -106,7 +106,7 @@ public class ArgXpath extends SynapseXPath {
         if(StringUtils.isEmpty(type)){
             this.type=null;
         }else {
-            this.type=PropertyTypes.valueOf(type);
+            this.type= ArgType.valueOf(type);
             //what if is not string or om, what is type is custom ojo
         }
 
