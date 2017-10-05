@@ -25,8 +25,146 @@ Suppose there are several back end calls you need to make and in every call you 
 
 With the payload factory , you will have to create that part every time. Instead if you can create a property one time using a template and save it in the message context , you can reuse it without generating again and again.
 
-With the Velocity Template Mediator , it supports body,property,soap header,envelope as the targets. You can put the generated output to anyof these. And it supports both xml and json formats
+With the Velocity Template Mediator , it supports body,property,soap header,envelope as the targets. You can put the generated output to anyof these. And it supports xml, but json support will be there soon.
 
 
+## Examples
 
-Await for more documentation .....
+1. One to One Mapping
+
+```xml
+<velocityTemplate media-type="xml" 
+    xmlns="http://ws.apache.org/ns/synapse">
+    <format>
+        <person 
+            xmlns="">
+            <name>$name</name>
+            <age>$age</age>
+        </person>
+    </format>
+    <args>
+        <arg name="name" expression="//name1/text()" type="string" />
+        <arg name="age" expression="//age1/text()" type="string" />
+    </args>
+    <target target-type="body"/>
+</velocityTemplate>
+
+```
+
+2. Arrays
+
+```xml
+<velocityTemplate media-type="xml" 
+    xmlns="http://ws.apache.org/ns/synapse">
+    <format>
+        <students 
+            xmlns="">                        
+            #foreach($student in $students)  
+            <student>
+                <name>$student</name>
+                <test>$name</test>
+            </student>                       
+            #end                        
+        </students>
+    </format>
+    <args>
+        <arg name="students" expression="//name/text()" type="string" />
+        <arg name="name" expression="$ctx:p" type="string" />
+    </args>
+    <target target-type="body"/>
+</velocityTemplate>
+
+```
+
+3. Conditional Transformation
+
+```xml
+<velocityTemplate media-type="xml" 
+    xmlns="http://ws.apache.org/ns/synapse">
+    <format>
+        <people 
+            xmlns="">                                                    
+            #foreach($student in $students) 
+                #if($role=='student')  
+                <student>
+                    <name>$student</name>
+                </student>                             
+                #else                            
+                <teacher>
+                    <name>$student</name>
+                </teacher>                            
+                #end      
+            #end                           
+        </people>
+    </format>
+    <args>
+        <arg name="students" expression="//name/text()" type="string" />
+        <arg name="filter" expression="//role/text()" type="string" />
+    </args>
+    <target target-type="body"/>
+</velocityTemplate>
+
+```
+
+4. Using Pojos
+
+```xml   
+<velocityTemplate media-type="xml" 
+    xmlns="http://ws.apache.org/ns/synapse">
+    <format>
+        <people xmlns="">               
+            #foreach($student in $students) 
+                #if($student.getRole()=='student')  
+                <student>
+                    <name>$student.getName()</name>
+                </student>                            
+                #end  
+            #end                    
+        </people>
+    </format>
+    <args>
+        <arg name="students" expression="//person" type="custom" className="org.asanka.synapse.test.beans.Person"/>
+    </args>
+    <target target-type="body"/>
+</velocityTemplate>
+```
+
+Pojo Class
+
+```java
+package org.apache.synapse.mediators.test.beans;
+
+public class Person {
+
+    String name;
+    int age;
+    String role;
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+}
+
+```
+
