@@ -19,6 +19,7 @@ public class VelocityTemplateMediatorTest extends TestCase {
     private static String ONE_TO_ONE_CODE ="<velocityTemplate media-type=\"xml\" xmlns=\"http://ws.apache.org/ns/synapse\"><format><person xmlns=\"\"><fname>$name</fname><age>$age</age></person></format><args><arg name=\"name\" expression=\"//name/text()\" /><arg name=\"age\" expression=\"//age/text()\" /></args><target target-type=\"body\"/></velocityTemplate>";
     private static String ARRAY_CODE="<velocityTemplate media-type=\"xml\" xmlns=\"http://ws.apache.org/ns/synapse\"><format><students xmlns=\"\">        #foreach($student in $students)            <student><name>$student</name></student>        #end    </students></format><args><arg name=\"students\" expression=\"//name/text()\" type=\"string\" /></args><target target-type=\"body\"/></velocityTemplate>";
     private static String ARRAY_SOURCE="<people><person><name>asanka</name><age>27</age></person><person><name>nuwan</name><age>28</age></person><person><name>Eranda</name><age>30</age></person><person><name>Malith</name><age>27</age></person></people>";
+    private static String CUSTOM_TYPE_CODE="<velocityTemplate media-type=\"xml\" xmlns=\"http://ws.apache.org/ns/synapse\"><format><students xmlns=\"\">        #foreach($student in $students)            <student><name>$student.getName()</name></student>        #end    </students></format><args><arg name=\"students\" expression=\"//person\" type=\"custom\" className=\"org.apache.synapse.mediators.test.beans.Person\" /></args><target target-type=\"body\"/></velocityTemplate>";
 
 
 
@@ -67,6 +68,22 @@ public class VelocityTemplateMediatorTest extends TestCase {
         compareXpathResults("4","string(count(//name))",synCtx);
 
     }
+
+    public void testCustomTypeTransformation() throws Exception{
+
+        OMElement code = AXIOMUtil.stringToOM(CUSTOM_TYPE_CODE);
+        VelocityTemplateMediatorFactory factory=new VelocityTemplateMediatorFactory();
+        MessageContext synCtx = TestUtils.getTestContext(ARRAY_SOURCE);
+        Mediator mediator = factory.createMediator(code, null);
+        SynapseEnvironment synapseEnvironment = TestUtils.getTestSynaseEnvironment();
+        assertTrue(mediator instanceof VelocityTemplateMediator);
+        ((VelocityTemplateMediator)mediator).init(synapseEnvironment);
+        mediator.mediate(synCtx);
+        System.out.println(synCtx.getEnvelope().getBody().toString());
+        //compareXpathResults("4","string(count(//name))",synCtx);
+
+    }
+
 
     private void compareXpathResults(String result,String xpath,MessageContext ctx){
         try {

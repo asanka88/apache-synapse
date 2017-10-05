@@ -28,6 +28,7 @@ public class VelocityTemplateMediatorFactory extends AbstractMediatorFactory {
     public static final QName expressionAttribute=new QName("expression");
     public static final QName nameAttribute =new QName("name");
     public static final QName argTypeAttribute=new QName("type");
+    public static final QName classNameAttribute =new QName("className");
     public static final QName scopeAttribute=new QName("scope");
     public static final QName mediaTypeAttribute=new QName("media-type");
     public static final QName targetType=new QName("target-type");
@@ -64,13 +65,23 @@ public class VelocityTemplateMediatorFactory extends AbstractMediatorFactory {
             String name = argument.getAttributeValue(nameAttribute);
             String xpathExpression = argument.getAttributeValue(expressionAttribute);
             String argType = argument.getAttributeValue(argTypeAttribute);
+            String customType= argument.getAttributeValue(classNameAttribute);
             if(StringUtils.isEmpty(xpathExpression) || StringUtils.isEmpty(name)){
                 String msg = "expression or name attribute is missing in the arg element";
                 LOG.error(msg);
                 throw new SynapseArtifactDeploymentException(msg);
             }
             try {
-                synXpathMap.put(name,new ArgXpath(xpathExpression,argType));
+                ArgXpath value = new ArgXpath(xpathExpression, argType);
+                if(StringUtils.equalsIgnoreCase("custom",argType)){
+                    if(StringUtils.isEmpty(customType)){
+                        String msg = "className must not be present if type=\"custom\"";
+                        LOG.error(msg);
+                        throw new SynapseArtifactDeploymentException(msg);
+                    }
+                    value.setCustomType(customType);
+                }
+                synXpathMap.put(name, value);
             } catch (JaxenException e) {
                 String msg = "Error while constructing xpath from argument " + xpathExpression;
                 LOG.error(msg,e);

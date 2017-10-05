@@ -57,5 +57,12 @@ public class VelocityTemplateMediatorSerializationTest extends AbstractTestCase 
         assertTrue(serialization(inputXml, velocityTemplateMediatorSerializer));
     }
 
+    public void testVelocityTemplateMediatorCustomTypeSerialization() throws Exception {
+
+        String inputXml = "<velocityTemplate media-type=\"xml\" xmlns=\"http://ws.apache.org/ns/synapse\"><format><students>        #foreach($student in $students)            <student><name>$student.getText()</name></student>        #end    </students></format><args><arg name=\"students\" expression=\"//person\" type=\"custom\" className=\"org.apache.synapse.mediators.test.beans.Person\" /></args><target target-type=\"body\"/></velocityTemplate>";
+
+        assertTrue(serialization(inputXml, velocityTemplateMediatorFactory, velocityTemplateMediatorSerializer));
+        assertTrue(serialization(inputXml, velocityTemplateMediatorSerializer));
+    }
 
 }

@@ -47,9 +47,16 @@ public class VelocityTemplateMediatorSerializer extends AbstractMediatorSerializ
 
             OMElement arg = fac.createOMElement(VelocityTemplateMediatorFactory.argumentElement.getLocalPart(),synNS);
             arg.addAttribute(VelocityTemplateMediatorFactory.nameAttribute.getLocalPart(),entry.getKey(),null);
-            arg.addAttribute(VelocityTemplateMediatorFactory.expressionAttribute.getLocalPart(),entry.getValue().toString(),null);
-            if(entry.getValue().getType()!=null){
-                arg.addAttribute(VelocityTemplateMediatorFactory.argTypeAttribute.getLocalPart(),entry.getValue().getType().toString(),null);
+            ArgXpath value = entry.getValue();
+            arg.addAttribute(VelocityTemplateMediatorFactory.expressionAttribute.getLocalPart(), value.toString(),null);
+            if(value.getType()!=null){
+                arg.addAttribute(VelocityTemplateMediatorFactory.argTypeAttribute.getLocalPart(), value.getType().toString(),null);
+
+                String customType = value.getCustomType();
+                if(StringUtils.isNotEmpty(customType)){
+                    arg.addAttribute(VelocityTemplateMediatorFactory.classNameAttribute.getLocalPart(), customType.toString(),null);
+
+                }
             }
 
             argsListElement.addChild(arg);

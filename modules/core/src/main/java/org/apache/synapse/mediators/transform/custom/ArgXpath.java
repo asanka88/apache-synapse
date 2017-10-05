@@ -3,9 +3,18 @@ package org.apache.synapse.mediators.transform.custom;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMText;
+import org.apache.axiom.om.impl.llom.util.AXIOMUtil;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.databinding.utils.BeanUtil;
+import org.apache.axis2.engine.DefaultObjectSupplier;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseException;
 import org.apache.synapse.config.xml.enums.ArgType;
+import org.apache.synapse.mediators.bean.BeanUtils;
+import org.apache.synapse.util.AXIOMUtils;
 import org.apache.synapse.util.xpath.SynapseXPath;
 import org.jaxen.JaxenException;
 
@@ -19,7 +28,10 @@ import java.util.stream.Collectors;
  */
 public class ArgXpath extends SynapseXPath {
 
+    private static final Log LOG= LogFactory.getLog(ArgXpath.class);
     private ArgType type;
+    private String customType;
+    private Class customTypeClass;
 
     public ArgType getType() {
         return type;
@@ -44,8 +56,40 @@ public class ArgXpath extends SynapseXPath {
             case om:
                 finalResult = handleOM(evaluate);
                 break;
+            case custom:
+                finalResult = handleCustom(evaluate);
+                break;
             default:
                 finalResult = handleString(evaluate);
+        }
+
+        return finalResult;
+    }
+
+    private Object handleCustom(Object result) {
+
+        Object evaluate = handleOM(result);
+
+        Object finalResult=null;
+        if(evaluate instanceof ArrayList) {
+
+            finalResult = ((ArrayList) evaluate).stream().filter(o -> o instanceof OMElement).map(o -> {
+                try {
+                    return BeanUtil.deserialize(customTypeClass, ((OMElement) o), new DefaultObjectSupplier(), "result");
+                } catch (AxisFault axisFault) {
+                    axisFault.printStackTrace();
+                }
+                return null;
+            }).collect(Collectors.toList());
+
+
+        }else{
+            try {
+                finalResult =BeanUtil.deserialize(customTypeClass, (OMElement) evaluate, new DefaultObjectSupplier(), "result");
+            } catch (AxisFault axisFault) {
+                axisFault.printStackTrace();
+            }
+
         }
 
         return finalResult;
@@ -112,4 +156,24 @@ public class ArgXpath extends SynapseXPath {
 
     }
 
+    public void setCustomType(String customType) {
+        this.customType = customType;
+        try {
+            customTypeClass=Class.forName(customType);
+        } catch (ClassNotFoundException e) {
+            LOG.error(e);
+            throw new SynapseException("Class "+customType+" cannot be found for custom type",e);
+        }
+    }
+
+    public String getCustomType() {
+        return customType;
+    }
+
+    public Object getDefault() throws IllegalAccessException, InstantiationException {
+        if(this.type==ArgType.custom){
+            return customTypeClass.newInstance();
+        }
+        return "";
+    }
 }

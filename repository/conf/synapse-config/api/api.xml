@@ -33,11 +33,13 @@
                 xmlns="http://ws.apache.org/ns/synapse">
                 <format>
                     <students 
-                        xmlns="">                            #foreach($student in $students)                                    
+                        xmlns="">                            
+                        #foreach($student in $students)                                                            
                         <student>
                             <name>$student</name>
                             <test>$name</test>
-                        </student>                            #end                        
+                        </student>                            
+                        #end                                            
                     </students>
                 </format>
                 <args>
@@ -68,12 +70,94 @@
                 </args>
                 <target target-type="body" type="string"/>
             </velocityTemplate>
-                        <log level="full"/>
-
-  <!--<log level="custom">
-                <property name="array" expression="$ctx:prop1"/>
-            </log>-->
-
+            <log level="full"/>
+            <!--<log level="custom"><property name="array" expression="$ctx:prop1"/></log>-->
+            <respond/>
+        </inSequence>
+    </resource>
+    <resource uri-template="/ombody" methods="POST">
+        <inSequence>
+            <log level="custom">
+                <property name="array" value="===om body Test==="/>
+            </log>
+            <property name="code" value="testcode"/>
+            <velocityTemplate media-type="xml" 
+                xmlns="http://ws.apache.org/ns/synapse">
+                <format>
+                    <person 
+                        xmlns="">
+                        <name>$code</name>
+                    </person>
+                </format>
+                <args>
+                    <arg name="code" expression="$ctx:code"/>
+                </args>
+                <target target-type="property" name="propBody" scope="synapse" type="om"/>
+            </velocityTemplate>
+            <log level="custom">
+                <property name="array" expression="$ctx:propBody"/>
+            </log>
+            <respond/>
+        </inSequence>
+    </resource>
+    <resource uri-template="/condition" methods="POST">
+   <inSequence>
+            <log level="custom">
+                <property name="array" value="===arrayTest==="/>
+            </log>
+            <property name="p" value="myname"/>
+            <velocityTemplate media-type="xml" 
+                xmlns="http://ws.apache.org/ns/synapse">
+                <format>
+                    <people 
+                        xmlns="">                            
+                        #foreach($student in $students) 
+                            #if($role=='student')                                                           
+                            <student>
+                                <name>$student</name>
+                             </student>
+                             #else
+                            <teacher>
+                                <name>$student</name>
+                             </teacher>
+                            #end                       
+                        #end                                            
+                    </people>
+                </format>
+                <args>
+                    <arg name="students" expression="//name/text()" type="string" />
+                    <arg name="filter" expression="//role/text()" type="string" />
+                 </args>
+                <target target-type="body"/>
+            </velocityTemplate>
+            <respond/>
+        </inSequence>
+    </resource>
+        <resource uri-template="/pojo" methods="POST">
+   <inSequence>
+            <log level="custom">
+                <property name="array" value="===arrayTest==="/>
+            </log>
+            <property name="p" value="myname"/>
+            <velocityTemplate media-type="xml" 
+                xmlns="http://ws.apache.org/ns/synapse">
+                <format>
+                    <people 
+                        xmlns="">                            
+                        #foreach($student in $students) 
+                            #if($student.getRole()=='student')                                                           
+                            <student>
+                                <name>$student.getName()</name>
+                             </student>
+                            #end                       
+                        #end                                            
+                    </people>
+                </format>
+                <args>
+                    <arg name="students" expression="//person" type="custom" className="org.asanka.synapse.test.beans.Person"/>
+                  </args>
+                <target target-type="body"/>
+            </velocityTemplate>
             <respond/>
         </inSequence>
     </resource>

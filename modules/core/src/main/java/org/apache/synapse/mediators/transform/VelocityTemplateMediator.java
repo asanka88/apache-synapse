@@ -69,14 +69,14 @@ public class VelocityTemplateMediator extends AbstractMediator implements Manage
                     String msg=String.format("Argument %s result== %s",xpath.getRootExpr().getText(),result.toString());
                     LOG.debug(msg);
                 }
-                Object val = Optional.ofNullable(result).orElse("");
+                Object val = Optional.ofNullable(result).orElse(xpath.getDefault());
                 context.put(entry.getKey(),val);
-             } catch (JaxenException e) {
+             } catch (JaxenException| IllegalAccessException| InstantiationException e) {
                 String msg = String.format("Error while evaluating argument %s",xpath.getRootExpr().getText());
                 LOG.error(msg,e);
                 handleException(msg,e,messageContext);
             }
-         });
+        });
 
         StringWriter writer = new StringWriter();
         velocityEngine.evaluate(context, writer, "propTempate", new StringReader(this.getTemplate()));

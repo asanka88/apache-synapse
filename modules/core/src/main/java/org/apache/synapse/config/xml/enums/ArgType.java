@@ -5,5 +5,6 @@ package org.apache.synapse.config.xml.enums;
  */
 public enum ArgType {
     string,
-    om
+    om,
+    custom
 }
