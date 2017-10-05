@@ -27,10 +27,11 @@ With the payload factory , you will have to create that part every time. Instead
 
 With the Velocity Template Mediator , it supports body,property,soap header,envelope as the targets. You can put the generated output to anyof these. And it supports xml, but json support will be there soon.
 
+On top of that, you can use POJOs in transformations. You can create a POJO that maps to a xml segment and us that as shown in [Example #4](#4using-pojos)
 
 ## Examples
 
-1. One to One Mapping
+### 1. One to One Mapping
 
 ```xml
 <velocityTemplate media-type="xml" 
@@ -51,7 +52,7 @@ With the Velocity Template Mediator , it supports body,property,soap header,enve
 
 ```
 
-2. Arrays
+### 2. Arrays
 
 ```xml
 <velocityTemplate media-type="xml" 
@@ -76,7 +77,7 @@ With the Velocity Template Mediator , it supports body,property,soap header,enve
 
 ```
 
-3. Conditional Transformation
+### 3. Conditional Transformation
 
 ```xml
 <velocityTemplate media-type="xml" 
@@ -106,7 +107,7 @@ With the Velocity Template Mediator , it supports body,property,soap header,enve
 
 ```
 
-4. Using Pojos
+### 4.Using Pojos
 
 ```xml   
 <velocityTemplate media-type="xml" 
